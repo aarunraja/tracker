@@ -18,6 +18,8 @@ namespace TrackSheet_Loader
         private  readonly FirestoreDb db;
         public Loader()
         {
+            //https://github.com/GoogleCloudPlatform/dotnet-docs-samples/tree/main/firestore
+
             //GoogleCredential cred = GoogleCredential.FromFile("JsonCredentials.json");
 
             string filepath = "JsonCredentials.json";
@@ -77,14 +79,23 @@ namespace TrackSheet_Loader
             try
             {
                 DocumentReference docRef = db.Collection("locations_" + item.WHCode).Document(item.LocationCode1);
+
+                DocumentSnapshot snapshot = docRef.GetSnapshotAsync().Result;
+                if (snapshot.Exists)
+                {
+                    LocationModel location = snapshot.ConvertTo<LocationModel>();
+                    location.EAN.Add(item.EAN);
+                    return;
+                }
+
                 var itemModel = new LocationModel()
                 {
                     Material = item.Material,
                     Name = item.Name,
                     Category = item.Category,
-                    EAN = new List<string>() {item.EAN }
+                    EAN = new List<string>() { item.EAN }
                 };
-                
+
                 docRef.SetAsync(itemModel).ConfigureAwait(true);
             }
             catch (Exception ex)

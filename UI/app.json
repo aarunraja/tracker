@@ -1,0 +1,45 @@
+{
+  "expo": {
+    "name": "PART TRACK",
+    "slug": "tracker",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#000000"
+    },
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.part.track",
+      "googleServicesFile": "./GoogleService-Info.plist"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "config": {
+        "firebase": {
+          "apiKey": "AIzaSyBfipBEC2tFxesBSODN1MUMMN5XiG0mqK4",
+          "authDomain": "mylearning-986f3.firebaseapp.com",
+          "projectId": "mylearning-986f3",
+          "storageBucket": "mylearning-986f3.appspot.com",
+          "messagingSenderId": "348265894282",
+          "appId": "1:348265894282:web:c493b9cf6ba1d1a3137873",
+          "measurementId": "G-CTFS88VHPY"
+        }
+      }
+    },
+    "android": {
+      "package": "com.part.track",
+      "googleServicesFile": "./google-services.json",
+      "versionCode": 5,
+      "permissions": []
+    }
+  }
+}

@@ -1,0 +1,9 @@
+export const UserActionTypes = {
+    SIGNUP_REQUEST: '@@user/SIGNUP_REQUEST',
+    SIGNUP_SUCCESS: '@@user/SIGNUP_SUCCESS',
+    SIGNUP_FAILURE: '@@user/SIGNUP_FAILURE',
+
+    LOGIN_REQUEST: '@@user/LOGIN_REQUEST',
+    LOGIN_SUCCESS: '@@user/LOGIN_SUCCESS',
+    LOGIN_FAILURE: '@@user/LOGIN_FAILURE',
+};
