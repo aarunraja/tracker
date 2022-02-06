@@ -29,7 +29,7 @@ namespace TrackSheet_Loader
             //var builder = new FirestoreClientBuilder() { JsonCredentials = jsonString };
             //FirestoreDb db = FirestoreDb.Create("my-project", builder.Build());
 
-            db = FirestoreDb.Create("mylearning-986f3");
+            db = FirestoreDb.Create("parttrack-d4832");
 
         }
 
@@ -39,16 +39,77 @@ namespace TrackSheet_Loader
 
             foreach (var item in items)
             {
-                //AddArticles(item);
+                AddArticles(item);
                 if (!string.IsNullOrEmpty(item.LocationCode1))
                     AddLocations(item);
             }
+        }
+
+        public void UpdateArticleBarCode(List<CsvItem> items)
+        {
+
+            foreach (var item in items)
+            {
+                try
+                {
+                    //Query materialQuery = db.Collection("articles_" + item.WHCode).WhereEqualTo("Material", item.Material);
+                    var material = item.Material;
+                    if (!string.IsNullOrEmpty(material))
+                    {
+                        Query materialQuery = db.Collection("articles_" + item.WHCode).WhereEqualTo("Material", item.Material);
+                        QuerySnapshot materialSnapshot = materialQuery.GetSnapshotAsync().Result;
+                        List<string> barcodes = materialSnapshot.Documents.Select(d => d.Id).ToList();
+                        if (barcodes.Count > 1)
+                        {
+                            DocumentReference eanRef = db.Collection("articles_" + item.WHCode).Document(item.EAN);
+                            barcodes.Remove(item.EAN);
+                            barcodes.ForEach(b =>
+                            {
+                                var result = eanRef.UpdateAsync("BarCode", FieldValue.ArrayUnion(b)).Result;
+                            });
+                        }
+                    }
+                }
+                catch (Exception) { }
+            }
+
+        }
+
+        public void GetArticleCount() {
+            var collectionReference = db.Collection("articles_WH01");
+            var snapshot = collectionReference.GetSnapshotAsync().Result;
+            var a = snapshot.Count;
+        }
+        public void GetArticles()
+        {
+            DocumentReference docRef = db.Collection("articles_WH01").Document("9513355355183");
+            DocumentSnapshot snapshot = docRef.GetSnapshotAsync().Result;
+            if (snapshot.Exists)
+            {
+                Console.WriteLine("Document data for {0} document:", snapshot.Id);
+                Dictionary<string, object> city = snapshot.ToDictionary();
+                foreach (KeyValuePair<string, object> pair in city)
+                {
+                    Console.WriteLine("{0}: {1}", pair.Key, pair.Value);
+                }
+            }
+            else
+            {
+                Console.WriteLine("Document {0} does not exist!", snapshot.Id);
+            }
+
         }
 
         private void AddArticles(CsvItem item)
         {
             try
             {
+                DocumentReference getdocRef = db.Collection("articles_" + item.WHCode).Document(item.EAN);
+                DocumentSnapshot snapshot = getdocRef.GetSnapshotAsync().Result;
+                if (snapshot.Exists)
+                {
+                    return;
+                }
                 DocumentReference docRef = db.Collection("articles_" + item.WHCode).Document(item.EAN);
                 var itemModel = new ArticleModel()
                 {
@@ -59,15 +120,25 @@ namespace TrackSheet_Loader
                     Vendor_Name = item.Vendor_Name,
                     Brand = item.Brand,
                     FxCode = item.FxCode,
-                    LocationCode = new List<string>()
+                    LocationCode = new List<string>(),
+                    BarCode = new List<string>() { item.EAN }
                 };
+
+                //Query materialQuery = db.Collection("articles_" + item.WHCode).WhereEqualTo("Material", item.Material);
+                //QuerySnapshot materialSnapshot = materialQuery.GetSnapshotAsync().Result;
+                //foreach (DocumentSnapshot documentSnapshot in materialSnapshot.Documents)
+                //{
+                //    itemModel.BarCode.Add(documentSnapshot.Id);
+                //}  
+
+
                 if (!string.IsNullOrEmpty(item.LocationCode1))
                     itemModel.LocationCode.Add(item.LocationCode1);
 
                 if (!string.IsNullOrEmpty(item.LocationCode2))
                     itemModel.LocationCode.Add(item.LocationCode2);
 
-                docRef.SetAsync(itemModel).ConfigureAwait(true);
+                var result = docRef.SetAsync(itemModel).Result;
             }
             catch (Exception ex)
             {
@@ -79,21 +150,12 @@ namespace TrackSheet_Loader
             try
             {
                 DocumentReference docRef = db.Collection("locations_" + item.WHCode).Document(item.LocationCode1);
-
-                DocumentSnapshot snapshot = docRef.GetSnapshotAsync().Result;
-                if (snapshot.Exists)
-                {
-                    LocationModel location = snapshot.ConvertTo<LocationModel>();
-                    location.EAN.Add(item.EAN);
-                    return;
-                }
-
                 var itemModel = new LocationModel()
                 {
                     Material = item.Material,
                     Name = item.Name,
                     Category = item.Category,
-                    EAN = new List<string>() { item.EAN }
+                    EAN = item.EAN 
                 };
 
                 docRef.SetAsync(itemModel).ConfigureAwait(true);

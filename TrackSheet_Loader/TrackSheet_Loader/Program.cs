@@ -11,11 +11,17 @@ namespace TrackSheet_Loader
     {
         static void Main(string[] args)
         {
-            var item = ReadCSVFile(@"D:\mass\tracker\document\NEW EAN MASTER V1.csv");
-            new Loader().AddDocument(item);
+            try
+            {
+                var item = ReadCSVFile(@"D:\mass\tracker\document\NEW EAN MASTER V1.csv");
+                new Loader().AddDocument(item);
+                new Loader().UpdateArticleBarCode(item);
+            }
+            catch (Exception ex)
+            { }
+            //new Loader().GetArticles();
+            //new Loader().GetArticleCount();
             Console.WriteLine("Hello World!");
-
-
         }
 
         public static List<CsvItem> ReadCSVFile(string location)
@@ -26,6 +32,7 @@ namespace TrackSheet_Loader
                 using (var csv = new CsvReader(reader))
                 {
                     csv.Configuration.RegisterClassMap<CsvItemMapper>();
+                    csv.Configuration.MissingFieldFound = null;
                     var records = csv.GetRecords<CsvItem>().ToList();
                     return records;
                 }

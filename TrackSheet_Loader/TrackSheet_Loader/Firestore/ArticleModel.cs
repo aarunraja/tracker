@@ -25,6 +25,8 @@ namespace TrackSheet_Loader
         [FirestoreProperty]
         public string FxCode { get; set; }
         [FirestoreProperty]
+        public List<string> BarCode { get; set; }
+        [FirestoreProperty]
         public List<string> LocationCode { get; set; }
     }
 }

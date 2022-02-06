@@ -17,6 +17,6 @@ namespace TrackSheet_Loader
         [FirestoreProperty]
         public string Category { get; set; }
         [FirestoreProperty]
-        public List<string> EAN { get; set; }
+        public string EAN { get; set; }
     }
 }
