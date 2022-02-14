@@ -22,15 +22,42 @@ namespace TrackSheet_Loader
 
             //GoogleCredential cred = GoogleCredential.FromFile("JsonCredentials.json");
 
-            string filepath = "JsonCredentials.json";
-            Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", filepath);
+            //string filepath = "JsonCredentials.json";
+            //Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", filepath);
 
-            //var jsonString = File.ReadAllText("JsonCredentials.json");
-            //var builder = new FirestoreClientBuilder() { JsonCredentials = jsonString };
-            //FirestoreDb db = FirestoreDb.Create("my-project", builder.Build());
+            var jsonString = File.ReadAllText("JsonCredentials.json");
+            var builder = new FirestoreClientBuilder() { JsonCredentials = jsonString };
+            db = FirestoreDb.Create("parttrack-d4832", builder.Build());
 
-            db = FirestoreDb.Create("parttrack-d4832");
+            //db = FirestoreDb.Create("parttrack-d4832");
 
+        }
+
+        public void DownloadData()
+        {
+            var collectionReference = db.Collection("articles_WH01");
+            var snapshot = collectionReference.GetSnapshotAsync().Result;
+            var docs = snapshot.Documents;
+
+            using (var w = new StreamWriter(@"D:\mass\tracker\document\download.csv"))
+            {
+                foreach (var doc in docs)
+                {
+                    var location = string.Join(",", doc.GetValue<List<string>>("LocationCode"));
+                    var line = string.Format("{0},{1},{2},{3},{4},{5},{6},{7},{8}", doc.Id,
+                        doc.GetValue<string>("Material").Replace(",",""),
+                        doc.GetValue<string>("Name").Replace(",", ""),
+                        doc.GetValue<string>("Brand").Replace(",", ""),
+                        doc.GetValue<string>("Category").Replace(",", ""),
+                        doc.GetValue<string>("FxCode").Replace(",", ""),
+                        doc.GetValue<bool>("RTV").ToString(),
+                        doc.GetValue<string>("Vendor_Name").Replace(",", ""),
+                        location
+                        );
+                    w.WriteLine(line);
+                    w.Flush();
+                }
+            }
         }
 
 
@@ -69,6 +96,36 @@ namespace TrackSheet_Loader
                             });
                         }
                     }
+                }
+                catch (Exception) { }
+            }
+
+        }
+
+        public void UpdateArticleLocationCode(List<CsvItem1> items)
+        {
+
+            foreach (var item in items)
+            {
+                try
+                {
+
+                    DocumentReference eanRef = db.Collection("articles_WH01").Document(item.EAN);
+                    DocumentSnapshot snapshot = eanRef.GetSnapshotAsync().Result;
+                    if (snapshot.Exists)
+                    {
+                        var locations = snapshot.GetValue<List<string>>("LocationCode");
+                        if (locations.Count == 0)
+                        {
+                            var result = eanRef.UpdateAsync("LocationCode", FieldValue.ArrayUnion(item.LocationCode1)).Result;
+                        }
+                        else if(locations.FirstOrDefault()!= item.LocationCode1)
+                        {
+                            var result1 = eanRef.UpdateAsync("LocationCode", FieldValue.ArrayRemove(item.LocationCode1)).Result;
+                            var result = eanRef.UpdateAsync("LocationCode", FieldValue.ArrayUnion(item.LocationCode1)).Result;
+                        }
+                    }
+
                 }
                 catch (Exception) { }
             }

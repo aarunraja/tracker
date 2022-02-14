@@ -13,12 +13,15 @@ namespace TrackSheet_Loader
         {
             try
             {
-                var item = ReadCSVFile(@"D:\mass\tracker\document\NEW EAN MASTER V1.csv");
-                new Loader().AddDocument(item);
-                new Loader().UpdateArticleBarCode(item);
+                //var item = ReadCSVFile(@"D:\mass\tracker\document\Location_Update.csv");
+
+                //new Loader().AddDocument(item);
+                //new Loader().UpdateArticleBarCode(item);
+                //new Loader().UpdateArticleLocationCode(item);
             }
             catch (Exception ex)
             { }
+            new Loader().DownloadData();
             //new Loader().GetArticles();
             //new Loader().GetArticleCount();
             Console.WriteLine("Hello World!");

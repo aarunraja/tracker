@@ -25,4 +25,15 @@ namespace TrackSheet_Loader
             //Map(m => m.LocationCode3).Name("Current Loc- 3");
         }
     }
+
+    public class CsvItemMapper1 : ClassMap<CsvItem1>
+    {
+        public CsvItemMapper1()
+        {
+            Map(m => m.EAN).Name("EAN");
+            Map(m => m.Material).Name("Material");
+            Map(m => m.LocationCode1).Name("Current Loc- 1");
+        }
+    }
+
 }

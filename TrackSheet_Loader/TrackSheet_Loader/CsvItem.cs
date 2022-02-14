@@ -21,4 +21,11 @@ namespace TrackSheet_Loader
         public string LocationCode2 { get; set; }
         public string LocationCode3 { get; set; }
     }
+
+    public class CsvItem1
+    {
+        public string EAN { get; set; }
+        public string Material { get; set; }
+        public string LocationCode1 { get; set; }
+    }
 }
